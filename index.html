@@ -131,6 +131,21 @@
   .section-title { font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; margin: 0 0 0.8rem; text-shadow: 0 1px 8px rgba(0,0,0,0.3); }
   .section-sub { color: rgba(255,255,255,0.8); font-size: 1.05rem; max-width: 40ch; margin: 0 0 2rem; font-weight: 300; }
 
+  .widget-wrap {
+    border-radius: 1.5rem;
+    padding: 1.6rem;
+    margin-bottom: 2.4rem;
+    overflow: hidden;
+  }
+  .widget-wrap .widget-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.5);
+    margin: 0 0 0.9rem;
+    font-weight: 600;
+  }
+
   .cards-grid { display: grid; grid-template-columns: 1fr; gap: 1.6rem; }
   @media (min-width: 900px) { .cards-grid { grid-template-columns: repeat(3, 1fr); } }
 
@@ -290,7 +305,14 @@
     <!-- PROPUESTAS -->
     <section class="view" id="view-propuestas">
       <h2 class="section-title serif">Petición de Viaje</h2>
-      <p class="section-sub">Propuestas seleccionadas especialmente para ti. Compara precios y elige dónde completar tu reserva.</p>
+      <p class="section-sub">Busca vuelos reales o explora nuestras propuestas seleccionadas.</p>
+
+      <div class="widget-wrap glass-dark">
+        <p class="widget-label">Buscador de vuelos en vivo</p>
+        <script async src="https://tpembd.com/content?currency=mxn&trs=581256&shmarker=785312&show_hotels=true&powered_by=true&locale=es&searchUrl=www.aviasales.com%2Fsearch&primary_override=%23FFFFFFff&color_button=%23FFBE3Aff&color_icons=%2332BADDff&dark=%23262626&light=%23FFFFFF&secondary=%230f172a&special=%23C4C4C4&color_focused=%2332a8dd&border_radius=0&no_labels=&plain=true&promo_id=7879&campaign_id=100" charset="utf-8"></script>
+      </div>
+
+      <p class="section-sub" style="margin-top:0.4rem;">Propuestas seleccionadas especialmente para ti. Compara precios y elige dónde completar tu reserva.</p>
       <div class="cards-grid" id="cardsGrid"></div>
     </section>
 
@@ -349,18 +371,18 @@
 const FLIGHT_DATA = [
   { id:1, city:'París', country:'Francia', iataFrom:'MEX', iataTo:'CDG', originCity:'Ciudad de México',
     hue:['#2b4a6b','#13263d'], price:1250, date:'24 MAY 2026', time:'08:30', flightNo:'TR 1024', seat:'12A',
-    duration:'11h 20m', airline:'Air France', site:'Expedia',
-    link:'https://www.expedia.mx/', 
+    duration:'11h 20m', airline:'Air France', site:'Aviasales',
+    link:'https://aviasales.tpk.lu/6EgycCGa',
     description:'Experimenta el romance y la historia de la Ciudad de la Luz. Vuelo directo con equipaje incluido y amenidades premium.' },
   { id:2, city:'Tokio', country:'Japón', iataFrom:'MEX', iataTo:'HND', originCity:'Ciudad de México',
     hue:['#6b2b4a','#3d1326'], price:2100, date:'10 JUN 2026', time:'14:15', flightNo:'JL 0045', seat:'08F',
-    duration:'14h 45m', airline:'Japan Airlines', site:'Skyscanner',
-    link:'https://www.skyscanner.com.mx/',
+    duration:'14h 45m', airline:'Japan Airlines', site:'Aviasales',
+    link:'https://aviasales.tpk.lu/6EgycCGa',
     description:'Descubre la mezcla perfecta entre tradición milenaria y tecnología futurista. Asientos clase business con gastronomía local.' },
   { id:3, city:'Bali', country:'Indonesia', iataFrom:'MEX', iataTo:'DPS', originCity:'Ciudad de México',
     hue:['#1f6b5a','#0d3d33'], price:1850, date:'05 AGO 2026', time:'23:50', flightNo:'QR 0942', seat:'22C',
-    duration:'22h 10m', airline:'Qatar Airways', site:'Expedia',
-    link:'https://www.expedia.mx/',
+    duration:'22h 10m', airline:'Qatar Airways', site:'Aviasales',
+    link:'https://aviasales.tpk.lu/6EgycCGa',
     description:'Relájate en paraísos tropicales, playas de arena blanca y templos sagrados. La escapada perfecta para desconectar.' }
 ];
 
