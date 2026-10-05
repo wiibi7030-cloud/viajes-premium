@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Viajes Premium</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0f172a;
+    --navy-2: #1e293b;
+    --cream: #fdfaf6;
+    --ink: #263345;
+    --muted: #71717a;
+    --red: #a43b3b;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  html, body { height: 100%; margin: 0; }
+  body {
+    min-height: 100%;
+    background: var(--navy);
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+    position: relative;
+  }
+  .serif { font-family: 'Playfair Display', serif; }
+
+  /* ===== Fondo ilustrado (reemplaza las fotos de stock) ===== */
+  .bg-scene {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background: radial-gradient(ellipse at 20% 15%, #2d4a6b 0%, #0f172a 55%),
+                linear-gradient(180deg, #14213d 0%, #0f172a 100%);
+  }
+  .bg-scene svg { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.5; }
+  .bg-dim { position: fixed; inset: 0; z-index: 0; background: rgba(15,23,42,0.35); backdrop-filter: blur(2px); }
+
+  /* ===== Glass ===== */
+  .glass-panel {
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255,255,255,0.3);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  }
+  .glass-dark {
+    background: rgba(15,23,42,0.5);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+  @keyframes slideUp { from{opacity:0; transform:translateY(40px)} to{opacity:1; transform:translateY(0)} }
+  .fade-in { animation: fadeIn 0.8s cubic-bezier(.16,1,.3,1) forwards; }
+  .slide-up { animation: slideUp 0.8s cubic-bezier(.16,1,.3,1) forwards; }
+
+  button { font-family: inherit; cursor: pointer; border: none; }
+  a { color: inherit; text-decoration: none; }
+
+  .view { display: none; position: relative; z-index: 10; }
+  .view.active { display: block; }
+
+  /* ===== Portada ===== */
+  #portada {
+    position: fixed; inset: 0; z-index: 50;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .portada-card {
+    border-radius: 3rem;
+    padding: 3rem 1.5rem;
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+    max-width: 640px; margin: 0 1rem;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    border-top: 1px solid rgba(255,255,255,0.4);
+    border-left: 1px solid rgba(255,255,255,0.4);
+  }
+  .compass-badge {
+    width: 72px; height: 72px; margin-bottom: 1.8rem; border-radius: 50%;
+    background: rgba(255,255,255,0.2); backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid rgba(255,255,255,0.3);
+  }
+  .portada-card h1 {
+    font-size: clamp(2rem, 6vw, 3.6rem); font-weight: 700; line-height: 1.15;
+    margin: 0 0 1.2rem; text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  }
+  .portada-card p { font-size: clamp(0.95rem, 2vw, 1.15rem); color: rgba(255,255,255,0.9); max-width: 36ch; margin: 0 0 2.2rem; font-weight: 300; }
+  .btn-light {
+    background: #fff; color: var(--navy-2); font-weight: 700; font-size: 1.05rem;
+    padding: 1rem 2.2rem; border-radius: 999px; display: inline-flex; align-items: center; gap: 0.6rem;
+    box-shadow: 0 0 40px rgba(255,255,255,0.3); transition: box-shadow 0.3s, transform 0.3s;
+  }
+  .btn-light:hover { box-shadow: 0 0 60px rgba(255,255,255,0.5); transform: translateY(-2px); }
+
+  /* ===== Sidebar ===== */
+  .sidebar {
+    position: fixed; left: 1.5rem; top: 50%; transform: translateY(-50%); z-index: 50;
+    border-radius: 2rem; padding: 1.6rem 0.9rem;
+    display: none; flex-direction: column; gap: 1.6rem; align-items: center;
+  }
+  @media (min-width: 1024px) { .sidebar { display: flex; } }
+  .nav-btn {
+    width: 46px; height: 46px; border-radius: 50%; background: transparent; color: rgba(255,255,255,0.6);
+    display: flex; align-items: center; justify-content: center; transition: all 0.25s;
+  }
+  .nav-btn:hover { color: #fff; background: rgba(255,255,255,0.1); }
+  .nav-btn.active { background: #fff; color: var(--navy-2); box-shadow: 0 0 20px rgba(255,255,255,0.4); }
+  .nav-sep { width: 28px; height: 1px; background: rgba(255,255,255,0.2); margin: 0.2rem 0; }
+
+  .mobile-nav {
+    display: flex; justify-content: space-between; align-items: center; border-radius: 1.2rem;
+    padding: 0.8rem; margin-bottom: 1.5rem; position: sticky; top: 0.8rem; z-index: 40;
+  }
+  @media (min-width: 1024px) { .mobile-nav { display: none; } }
+  .mobile-nav button { background: transparent; color: rgba(255,255,255,0.6); padding: 0.7rem 1.1rem; border-radius: 0.8rem; }
+  .mobile-nav button.active { background: #fff; color: var(--navy-2); }
+
+  main { position: relative; z-index: 10; padding: 1.2rem 1.2rem 5rem; min-height: 100vh; }
+  @media (min-width: 1024px) { main { padding: 3rem 3rem 5rem 9rem; } }
+  .content-wrap { max-width: 1100px; margin: 0 auto; }
+
+  /* ===== Propuestas ===== */
+  .section-title { font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; margin: 0 0 0.8rem; text-shadow: 0 1px 8px rgba(0,0,0,0.3); }
+  .section-sub { color: rgba(255,255,255,0.8); font-size: 1.05rem; max-width: 40ch; margin: 0 0 2rem; font-weight: 300; }
+
+  .widget-wrap {
+    border-radius: 1.5rem;
+    padding: 1.6rem;
+    margin-bottom: 2.4rem;
+    overflow: hidden;
+  }
+  .widget-wrap .widget-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.5);
+    margin: 0 0 0.9rem;
+    font-weight: 600;
+  }
+
+  .cards-grid { display: grid; grid-template-columns: 1fr; gap: 1.6rem; }
+  @media (min-width: 900px) { .cards-grid { grid-template-columns: repeat(3, 1fr); } }
+
+  .flight-card { border-radius: 2rem; overflow: hidden; display: flex; flex-direction: column; transition: transform 0.3s; }
+  .flight-card:hover { transform: translateY(-6px); }
+  .card-art { height: 180px; position: relative; overflow: hidden; }
+  .card-art svg { width: 100%; height: 100%; }
+  .card-chip { position: absolute; bottom: 0.9rem; left: 0.9rem; background: rgba(255,255,255,0.2); backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,0.3); padding: 0.4rem 0.9rem; border-radius: 999px; font-weight: 700; font-size: 0.85rem; }
+  .card-body { padding: 1.4rem; display: flex; flex-direction: column; flex: 1; }
+  .card-body h3 { font-size: 1.6rem; margin: 0 0 0.2rem; }
+  .card-country { color: rgba(255,255,255,0.6); font-size: 0.85rem; margin: 0 0 0.9rem; }
+  .card-desc { color: rgba(255,255,255,0.8); font-size: 0.85rem; line-height: 1.5; font-weight: 300; flex: 1; margin: 0 0 1rem; }
+  .card-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; font-size: 0.78rem; color: rgba(255,255,255,0.7); border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.9rem; margin-bottom: 1.1rem; }
+  .btn-card {
+    width: 100%; background: #fff; color: var(--navy-2); font-weight: 700; padding: 0.9rem; border-radius: 0.9rem;
+    display: flex; justify-content: center; align-items: center; gap: 0.5rem; box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  }
+
+  /* ===== Mis vuelos ===== */
+  .saved-item { border-radius: 1.2rem; padding: 1.3rem 1.4rem; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; border-left: 4px solid #60a5fa; margin-bottom: 1rem; }
+  .saved-left { display: flex; align-items: center; gap: 1.1rem; }
+  .saved-icon { width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; }
+  .badge { padding: 0.35rem 0.9rem; border-radius: 999px; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+  .badge.saved { background: rgba(34,197,94,0.2); color: #86efac; border: 1px solid rgba(34,197,94,0.3); }
+  .badge.searched { background: rgba(96,165,250,0.2); color: #93c5fd; border: 1px solid rgba(96,165,250,0.3); }
+
+  /* ===== Detalle ===== */
+  .back-link { display: inline-flex; align-items: center; gap: 0.4rem; color: rgba(255,255,255,0.7); margin-bottom: 1.5rem; font-size: 0.9rem; }
+  .detail-grid { display: grid; grid-template-columns: 1fr; gap: 1.6rem; }
+  @media (min-width: 950px) { .detail-grid { grid-template-columns: 1.1fr 0.9fr; } }
+  .detail-hero { border-radius: 2rem; overflow: hidden; height: 260px; position: relative; }
+  .detail-hero svg { width: 100%; height: 100%; }
+  .detail-hero .hero-title { position: absolute; bottom: 1.2rem; left: 1.4rem; }
+  .detail-hero .hero-title h2 { font-size: 2.4rem; margin: 0; text-shadow: 0 2px 10px rgba(0,0,0,0.4); }
+  .detail-hero .hero-title p { margin: 0; color: var(--red); font-weight: 700; letter-spacing: 0.1em; font-size: 0.8rem; text-transform: uppercase; }
+
+  .summary-panel { border-radius: 2rem; padding: 1.8rem; }
+  .summary-row { display: flex; justify-content: space-between; font-size: 0.9rem; color: rgba(255,255,255,0.75); padding: 0.5rem 0; }
+  .summary-row.total { border-top: 1px solid rgba(255,255,255,0.15); margin-top: 0.6rem; padding-top: 1rem; align-items: flex-end; }
+  .summary-row.total .label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.5); }
+  .summary-row.total .price { font-size: 2.6rem; font-weight: 700; font-family: 'Playfair Display', serif; }
+  .btn-buy {
+    width: 100%; background: #fff; color: var(--navy-2); font-weight: 700; font-size: 1.05rem; padding: 1rem; border-radius: 0.9rem;
+    display: flex; justify-content: center; align-items: center; gap: 0.7rem; margin-top: 1.4rem;
+    box-shadow: 0 0 30px rgba(255,255,255,0.25);
+  }
+  .secure-note { text-align: center; color: rgba(255,255,255,0.4); font-size: 0.72rem; margin-top: 0.9rem; display: flex; justify-content: center; gap: 0.4rem; align-items: center; }
+
+  /* ===== Boarding pass ===== */
+  .pass-wrap { max-width: 950px; margin: 2rem auto; }
+  .pass {
+    background: var(--cream); color: var(--ink); border-radius: 2rem; box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+    display: flex; flex-direction: column; overflow: hidden; position: relative;
+  }
+  @media (min-width: 800px) { .pass { flex-direction: row; height: 320px; } }
+  .pass-tag { display: none; width: 60px; background: var(--ink); color: #fff; flex-direction: column; align-items: center; justify-content: space-between; padding: 1.6rem 0; }
+  @media (min-width: 800px) { .pass-tag { display: flex; } }
+  .pass-tag .vert { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 0.68rem; letter-spacing: 0.35em; font-weight: 600; opacity: 0.9; }
+  .pass-main { flex: 1; padding: 1.6rem; position: relative; border-bottom: 2px dashed #c2b8ab; }
+  @media (min-width: 800px) { .pass-main { border-bottom: none; border-right: 3px dashed #c2b8ab; } }
+  .pass-top { display: flex; justify-content: space-between; }
+  .pass-top .pax p:first-child { font-size: 0.65rem; color: var(--muted); font-weight: 700; letter-spacing: 0.1em; margin: 0 0 0.2rem; }
+  .pass-top .pax p:last-child { font-size: 0.85rem; font-weight: 700; text-transform: uppercase; margin: 0; }
+  .pass-city { text-align: center; }
+  .pass-city h1 { font-size: clamp(1.8rem, 6vw, 3rem); font-weight: 700; text-transform: uppercase; margin: 0; letter-spacing: 0.02em; }
+  .pass-city p { color: var(--red); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase; margin: 0.2rem 0 0; }
+  .pass-route { display: flex; justify-content: space-between; align-items: center; margin-top: 2.2rem; }
+  .pass-route .iata { font-size: clamp(2rem, 7vw, 3rem); font-weight: 700; letter-spacing: -0.02em; margin: 0; line-height: 1; }
+  .pass-route .iata-sub { font-size: 0.6rem; color: var(--muted); font-weight: 700; text-transform: uppercase; margin-top: 0.3rem; line-height: 1.3; }
+  .pass-route .line-wrap { flex: 1; padding: 0 1rem; position: relative; display: flex; align-items: center; }
+  .pass-route .line { width: 100%; height: 2px; background: rgba(38,51,69,0.2); }
+  .pass-route .plane-icon { position: absolute; left: 50%; transform: translateX(-50%); font-size: 1.3rem; }
+  .pass-bottom { display: grid; grid-template-columns: repeat(4,1fr); gap: 0.8rem; margin-top: 1.6rem; }
+  .pass-bottom .label { font-size: 0.6rem; color: var(--muted); font-weight: 700; letter-spacing: 0.1em; margin: 0 0 0.2rem; }
+  .pass-bottom .val { font-size: 0.85rem; font-weight: 700; margin: 0; }
+  .pass-bottom .val.seat { color: var(--red); }
+  .pass-footer { margin-top: 1rem; color: var(--red); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; }
+
+  .pass-stub { width: 100%; padding: 1.4rem; display: flex; flex-direction: row; justify-content: space-between; }
+  @media (min-width: 800px) { .pass-stub { width: 260px; flex-direction: column; position: relative; } }
+  .pass-stub .stub-top { display: none; background: var(--ink); color: #fff; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.3em; padding: 0.8rem; justify-content: center; }
+  @media (min-width: 800px) { .pass-stub .stub-top { display: flex; margin: -1.4rem -1.4rem 1.2rem; border-top-right-radius: 2rem; } }
+  .stub-info { display: flex; flex-direction: column; gap: 0.9rem; }
+  .stub-row .label { font-size: 0.6rem; color: var(--muted); font-weight: 700; letter-spacing: 0.1em; margin: 0 0 0.2rem; }
+  .stub-row .val { font-size: 1.3rem; font-weight: 700; line-height: 1; }
+  .stub-row .sub { font-size: 0.6rem; color: var(--muted); font-weight: 700; text-transform: uppercase; }
+  .barcode { display: flex; align-items: flex-end; gap: 1px; height: 50px; align-self: center; }
+  @media (min-width: 800px) { .barcode { position: absolute; right: 1rem; bottom: 1.4rem; top: auto; } }
+  .bar { width: 2px; background: var(--ink); }
+  .bar.thick { width: 4px; }
+  .bar.thin { width: 1px; }
+
+  .confirm-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 70vh; text-align: center; }
+  .confirm-banner { background: rgba(34,197,94,0.2); border: 1px solid rgba(34,197,94,0.5); color: #86efac; border-radius: 999px; padding: 0.8rem 1.6rem; display: inline-flex; align-items: center; gap: 0.6rem; margin-bottom: 2rem; font-weight: 600; }
+  .btn-home { margin-top: 2rem; color: #fff; padding: 0.9rem 2rem; border-radius: 999px; display: inline-flex; align-items: center; gap: 0.6rem; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="bg-scene">
+  <svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <g fill="none" stroke="#3b5578" stroke-width="1">
+      <circle cx="120" cy="120" r="2" fill="#5b7fa6" stroke="none"/>
+      <circle cx="420" cy="80" r="2" fill="#5b7fa6" stroke="none"/>
+      <circle cx="650" cy="180" r="2" fill="#5b7fa6" stroke="none"/>
+      <circle cx="260" cy="320" r="2" fill="#5b7fa6" stroke="none"/>
+      <circle cx="560" cy="380" r="2" fill="#5b7fa6" stroke="none"/>
+      <path d="M120,120 Q270,40 420,80" stroke-dasharray="4 4"/>
+      <path d="M420,80 Q540,100 650,180" stroke-dasharray="4 4"/>
+      <path d="M120,120 Q190,220 260,320" stroke-dasharray="4 4"/>
+      <path d="M260,320 Q410,260 560,380" stroke-dasharray="4 4"/>
+    </g>
+  </svg>
+</div>
+<div class="bg-dim"></div>
+
+<!-- PORTADA -->
+<div id="portada" class="fade-in">
+  <div class="portada-card glass-panel slide-up">
+    <div class="compass-badge">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24,7.76 14.12,14.12 7.76,16.24 9.88,9.88"/></svg>
+    </div>
+    <h1 class="serif">New Way Of<br>Traveling</h1>
+    <p>Descubre propuestas de viaje seleccionadas y destinos exclusivos alrededor del mundo. Compara, elige, y reserva donde más te convenga.</p>
+    <button class="btn-light" onclick="startJourney()">
+      <span>Comenzar Viaje</span>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<nav class="sidebar glass-dark" id="sidebar">
+  <button class="nav-btn active" data-view="propuestas" onclick="navTo('propuestas')" title="Petición de Viaje">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13 2 9z"/><path d="M22 2 15 22l-4-9-9-4z"/></svg>
+  </button>
+  <button class="nav-btn" data-view="mis_vuelos" onclick="navTo('mis_vuelos')" title="Mis Vuelos">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/></svg>
+  </button>
+  <div class="nav-sep"></div>
+  <button class="nav-btn" title="Notificaciones"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></button>
+  <button class="nav-btn" title="Perfil"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a7.5 7.5 0 0 1 13 0"/></svg></button>
+</nav>
+
+<main>
+  <div class="content-wrap">
+    <div class="mobile-nav glass-dark">
+      <button class="active" data-view="propuestas" onclick="navTo('propuestas')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13 2 9z"/><path d="M22 2 15 22l-4-9-9-4z"/></svg>
+      </button>
+      <button data-view="mis_vuelos" onclick="navTo('mis_vuelos')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/></svg>
+      </button>
+      <button><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a7.5 7.5 0 0 1 13 0"/></svg></button>
+    </div>
+
+    <!-- PROPUESTAS -->
+    <section class="view" id="view-propuestas">
+      <h2 class="section-title serif">Petición de Viaje</h2>
+      <p class="section-sub">Busca vuelos reales o explora nuestras propuestas seleccionadas.</p>
+
+      <div class="widget-wrap glass-dark">
+        <p class="widget-label">Buscador de vuelos en vivo</p>
+        <script async src="https://tpembd.com/content?currency=mxn&trs=581256&shmarker=785312&show_hotels=true&powered_by=true&locale=es&searchUrl=www.aviasales.com%2Fsearch&primary_override=%23FFFFFFff&color_button=%23FFBE3Aff&color_icons=%2332BADDff&dark=%23262626&light=%23FFFFFF&secondary=%230f172a&special=%23C4C4C4&color_focused=%2332a8dd&border_radius=0&no_labels=&plain=true&promo_id=7879&campaign_id=100" charset="utf-8"></script>
+      </div>
+
+      <p class="section-sub" style="margin-top:0.4rem;">Propuestas seleccionadas especialmente para ti. Compara precios y elige dónde completar tu reserva.</p>
+      <div class="cards-grid" id="cardsGrid"></div>
+    </section>
+
+    <!-- MIS VUELOS -->
+    <section class="view" id="view-mis_vuelos">
+      <h2 class="section-title serif">Mis Vuelos</h2>
+      <p class="section-sub">Tus búsquedas guardadas y próximos viajes.</p>
+      <div id="savedList"></div>
+    </section>
+
+    <!-- DETALLE -->
+    <section class="view" id="view-detalles">
+      <button class="back-link" onclick="navTo('propuestas')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Volver a propuestas
+      </button>
+      <div class="detail-grid">
+        <div>
+          <div class="detail-hero" id="detailHero"></div>
+          <p style="color:rgba(255,255,255,0.8); margin-top:1.2rem; line-height:1.6; font-weight:300;" id="detailDesc"></p>
+        </div>
+        <div class="summary-panel glass-dark">
+          <div class="summary-row"><span>Tarifa base</span><span id="sumBase"></span></div>
+          <div class="summary-row"><span>Impuestos y tasas</span><span>$250</span></div>
+          <div class="summary-row total"><span class="label">Total</span><span class="price serif" id="sumTotal"></span></div>
+          <a class="btn-buy" id="buyLink" href="#" target="_blank" rel="noopener">
+            <span id="buyLabel">Ver en Expedia</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
+          <p class="secure-note">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            Te llevamos directo al sitio del proveedor para completar tu compra
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONFIRMACION (vista previa del boarding pass, sin compra real) -->
+    <section class="view" id="view-confirmacion">
+      <div class="confirm-wrap">
+        <div class="confirm-banner">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          Vista previa de tu pase de abordar
+        </div>
+        <div class="pass-wrap" id="passWrap"></div>
+        <button class="btn-home glass-dark" onclick="navTo('propuestas')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Volver al Inicio
+        </button>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script>
+const FLIGHT_DATA = [
+  { id:1, city:'París', country:'Francia', iataFrom:'MEX', iataTo:'CDG', originCity:'Ciudad de México',
+    hue:['#2b4a6b','#13263d'], price:1250, date:'24 MAY 2026', time:'08:30', flightNo:'TR 1024', seat:'12A',
+    duration:'11h 20m', airline:'Air France', site:'Aviasales',
+    link:'https://aviasales.tpk.lu/6EgycCGa',
+    description:'Experimenta el romance y la historia de la Ciudad de la Luz. Vuelo directo con equipaje incluido y amenidades premium.' },
+  { id:2, city:'Tokio', country:'Japón', iataFrom:'MEX', iataTo:'HND', originCity:'Ciudad de México',
+    hue:['#6b2b4a','#3d1326'], price:2100, date:'10 JUN 2026', time:'14:15', flightNo:'JL 0045', seat:'08F',
+    duration:'14h 45m', airline:'Japan Airlines', site:'Aviasales',
+    link:'https://aviasales.tpk.lu/6EgycCGa',
+    description:'Descubre la mezcla perfecta entre tradición milenaria y tecnología futurista. Asientos clase business con gastronomía local.' },
+  { id:3, city:'Bali', country:'Indonesia', iataFrom:'MEX', iataTo:'DPS', originCity:'Ciudad de México',
+    hue:['#1f6b5a','#0d3d33'], price:1850, date:'05 AGO 2026', time:'23:50', flightNo:'QR 0942', seat:'22C',
+    duration:'22h 10m', airline:'Qatar Airways', site:'Aviasales',
+    link:'https://aviasales.tpk.lu/6EgycCGa',
+    description:'Relájate en paraísos tropicales, playas de arena blanca y templos sagrados. La escapada perfecta para desconectar.' }
+];
+
+const SAVED_FLIGHTS = [
+  { city:'Nueva York', date:'15 SEP 2026', status:'Buscado', price:650 },
+  { city:'Roma', date:'02 OCT 2026', status:'Guardado', price:980 }
+];
+
+let selectedFlight = null;
+
+function cardArtSvg(hue, id) {
+  return `<svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
+    <defs><linearGradient id="g${id}" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="${hue[0]}"/><stop offset="100%" stop-color="${hue[1]}"/>
+    </linearGradient></defs>
+    <rect width="400" height="180" fill="url(#g${id})"/>
+    <circle cx="340" cy="40" r="60" fill="#ffffff" opacity="0.06"/>
+    <path d="M0,140 Q100,110 200,135 T400,120 V180 H0 Z" fill="#ffffff" opacity="0.05"/>
+    <path d="M30 90 L200 60 L370 90" stroke="#ffffff" stroke-width="1" stroke-dasharray="4 4" opacity="0.3" fill="none"/>
+  </svg>`;
+}
+
+function renderCards() {
+  const grid = document.getElementById('cardsGrid');
+  grid.innerHTML = FLIGHT_DATA.map(f => `
+    <div class="flight-card glass-panel">
+      <div class="card-art">${cardArtSvg(f.hue, f.id)}
+        <span class="card-chip">$${f.price} USD</span>
+      </div>
+      <div class="card-body">
+        <h3 class="serif">${f.city}</h3>
+        <p class="card-country">${f.country}</p>
+        <p class="card-desc">${f.description}</p>
+        <div class="card-meta">
+          <span>${f.date}</span><span>${f.duration}</span>
+        </div>
+        <button class="btn-card" onclick="selectFlight(${f.id})">
+          Ver Detalles del Vuelo
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderSaved() {
+  const list = document.getElementById('savedList');
+  list.innerHTML = SAVED_FLIGHTS.map(f => `
+    <div class="saved-item glass-panel">
+      <div class="saved-left">
+        <div class="saved-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13 2 9z"/><path d="M22 2 15 22l-4-9-9-4z"/></svg>
+        </div>
+        <div>
+          <h3 class="serif" style="margin:0 0 0.2rem; font-size:1.3rem;">${f.city}</h3>
+          <p style="margin:0; color:rgba(255,255,255,0.6); font-size:0.85rem;">${f.date}</p>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:1.4rem;">
+        <span class="badge ${f.status === 'Guardado' ? 'saved' : 'searched'}">${f.status}</span>
+        <span style="font-size:1.3rem; font-weight:700;">$${f.price}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function selectFlight(id) {
+  selectedFlight = FLIGHT_DATA.find(f => f.id === id);
+  renderDetail();
+  navTo('detalles');
+}
+
+function renderDetail() {
+  const f = selectedFlight;
+  document.getElementById('detailHero').innerHTML = cardArtSvg(f.hue, 'd'+f.id) +
+    `<div class="hero-title"><h2 class="serif">${f.city}</h2><p>${f.country}</p></div>`;
+  document.getElementById('detailDesc').textContent = f.description;
+  document.getElementById('sumBase').textContent = '$' + (f.price - 250);
+  document.getElementById('sumTotal').textContent = '$' + f.price;
+  document.getElementById('buyLabel').textContent = 'Ver en ' + f.site;
+  document.getElementById('buyLink').href = f.link;
+}
+
+function generateBarcode() {
+  let html = '';
+  for (let i = 0; i < 28; i++) {
+    const r = Math.random();
+    const cls = r > 0.6 ? 'thick' : r > 0.3 ? '' : 'thin';
+    const h = 20 + Math.random() * 30;
+    html += `<div class="bar ${cls}" style="height:${h}px"></div>`;
+  }
+  return html;
+}
+
+function renderPass() {
+  const f = selectedFlight;
+  document.getElementById('passWrap').innerHTML = `
+    <div class="pass slide-up">
+      <div class="pass-tag">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="transform:rotate(45deg)"><path d="M22 2 11 13 2 9z"/><path d="M22 2 15 22l-4-9-9-4z"/></svg>
+        <div class="vert">BOARDING PASS</div>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="transform:rotate(-135deg)"><path d="M22 2 11 13 2 9z"/><path d="M22 2 15 22l-4-9-9-4z"/></svg>
+      </div>
+      <div class="pass-main">
+        <div class="pass-top">
+          <div class="pax"><p>PASSENGER</p><p>Viajero Frecuente</p></div>
+        </div>
+        <div class="pass-city">
+          <h1 class="serif">${f.city}</h1>
+          <p>${f.country}</p>
+        </div>
+        <div class="pass-route">
+          <div><p class="iata">${f.iataFrom}</p><p class="iata-sub">${f.originCity}<br>Airport</p></div>
+          <div class="line-wrap"><div class="line"></div><span class="plane-icon">✈</span></div>
+          <div style="text-align:right"><p class="iata">${f.iataTo}</p><p class="iata-sub">${f.city}<br>Airport</p></div>
+        </div>
+        <div class="pass-bottom">
+          <div><p class="label">DATE</p><p class="val">${f.date}</p></div>
+          <div><p class="label">TIME</p><p class="val">${f.time}</p></div>
+          <div><p class="label">FLIGHT</p><p class="val">${f.flightNo}</p></div>
+          <div><p class="label">SEAT</p><p class="val seat">${f.seat}</p></div>
+        </div>
+        <div class="pass-footer">HAVE A NICE FLIGHT ✈</div>
+      </div>
+      <div class="pass-stub">
+        <div class="stub-top">BOARDING PASS ✈</div>
+        <div class="stub-info">
+          <div class="stub-row"><p class="label">FROM</p><p class="val">${f.iataFrom}</p><p class="sub">${f.originCity}</p></div>
+          <div class="stub-row"><p class="label">TO</p><p class="val">${f.iataTo}</p><p class="sub">${f.city}</p></div>
+        </div>
+        <div class="barcode">${generateBarcode()}</div>
+      </div>
+    </div>
+  `;
+}
+
+function startJourney() {
+  document.getElementById('portada').style.display = 'none';
+  document.getElementById('sidebar').style.display = '';
+  navTo('propuestas');
+}
+
+function navTo(view) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + view).classList.add('active');
+  document.querySelectorAll('[data-view]').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+  if (view === 'confirmacion' && selectedFlight) renderPass();
+  window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+// Botón de compra: muestra el pase de abordar de referencia después de abrir el link externo
+document.getElementById('buyLink').addEventListener('click', () => {
+  setTimeout(() => navTo('confirmacion'), 150);
+});
+
+renderCards();
+renderSaved();
+</script>
+</body>
+</html>
