@@ -153,7 +153,7 @@
   .flight-card:hover { transform: translateY(-6px); }
   .card-art { height: 180px; position: relative; overflow: hidden; }
   .card-art svg { width: 100%; height: 100%; }
-  .card-chip { position: absolute; bottom: 0.9rem; left: 0.9rem; background: rgba(255,255,255,0.2); backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,0.3); padding: 0.4rem 0.9rem; border-radius: 999px; font-weight: 700; font-size: 0.85rem; }
+  .card-chip { position: absolute; bottom: 0.9rem; left: 0.9rem; right: 0.9rem; background: rgba(255,255,255,0.2); backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,0.3); padding: 0.4rem 0.9rem; border-radius: 999px; font-weight: 700; font-size: 0.8rem; width: fit-content; }
   .card-body { padding: 1.4rem; display: flex; flex-direction: column; flex: 1; }
   .card-body h3 { font-size: 1.6rem; margin: 0 0 0.2rem; }
   .card-country { color: rgba(255,255,255,0.6); font-size: 0.85rem; margin: 0 0 0.9rem; }
@@ -307,7 +307,7 @@
       <h2 class="section-title serif">Petición de Viaje</h2>
       <p class="section-sub">Busca vuelos reales o explora nuestras propuestas seleccionadas.</p>
 
-      <div class="widget-wrap glass-dark">
+      <div class="widget-wrap glass-dark" id="widgetAnchor">
         <p class="widget-label">Buscador de vuelos en vivo</p>
         <script async src="https://tpembd.com/content?currency=mxn&trs=581256&shmarker=785312&show_hotels=true&powered_by=true&locale=es&searchUrl=www.aviasales.com%2Fsearch&primary_override=%23FFFFFFff&color_button=%23FFBE3Aff&color_icons=%2332BADDff&dark=%23262626&light=%23FFFFFF&secondary=%230f172a&special=%23C4C4C4&color_focused=%2332a8dd&border_radius=0&no_labels=&plain=true&promo_id=7879&campaign_id=100" charset="utf-8"></script>
       </div>
@@ -323,75 +323,72 @@
       <div id="savedList"></div>
     </section>
 
-    <!-- DETALLE -->
-    <section class="view" id="view-detalles">
-      <button class="back-link" onclick="navTo('propuestas')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-        Volver a propuestas
-      </button>
-      <div class="detail-grid">
-        <div>
-          <div class="detail-hero" id="detailHero"></div>
-          <p style="color:rgba(255,255,255,0.8); margin-top:1.2rem; line-height:1.6; font-weight:300;" id="detailDesc"></p>
-        </div>
-        <div class="summary-panel glass-dark">
-          <div class="summary-row"><span>Tarifa base</span><span id="sumBase"></span></div>
-          <div class="summary-row"><span>Impuestos y tasas</span><span>$250</span></div>
-          <div class="summary-row total"><span class="label">Total</span><span class="price serif" id="sumTotal"></span></div>
-          <a class="btn-buy" id="buyLink" href="#" target="_blank" rel="noopener">
-            <span id="buyLabel">Ver en Expedia</span>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          </a>
-          <p class="secure-note">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-            Te llevamos directo al sitio del proveedor para completar tu compra
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <!-- CONFIRMACION (vista previa del boarding pass, sin compra real) -->
-    <section class="view" id="view-confirmacion">
-      <div class="confirm-wrap">
-        <div class="confirm-banner">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-          Vista previa de tu pase de abordar
-        </div>
-        <div class="pass-wrap" id="passWrap"></div>
-        <button class="btn-home glass-dark" onclick="navTo('propuestas')">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-          Volver al Inicio
-        </button>
-      </div>
-    </section>
   </div>
 </main>
 
 <script>
-const FLIGHT_DATA = [
-  { id:1, city:'París', country:'Francia', iataFrom:'MEX', iataTo:'CDG', originCity:'Ciudad de México',
-    hue:['#2b4a6b','#13263d'], price:1250, date:'24 MAY 2026', time:'08:30', flightNo:'TR 1024', seat:'12A',
-    duration:'11h 20m', airline:'Air France', site:'Aviasales',
-    link:'https://aviasales.tpk.lu/6EgycCGa',
-    description:'Experimenta el romance y la historia de la Ciudad de la Luz. Vuelo directo con equipaje incluido y amenidades premium.' },
-  { id:2, city:'Tokio', country:'Japón', iataFrom:'MEX', iataTo:'HND', originCity:'Ciudad de México',
-    hue:['#6b2b4a','#3d1326'], price:2100, date:'10 JUN 2026', time:'14:15', flightNo:'JL 0045', seat:'08F',
-    duration:'14h 45m', airline:'Japan Airlines', site:'Aviasales',
-    link:'https://aviasales.tpk.lu/6EgycCGa',
-    description:'Descubre la mezcla perfecta entre tradición milenaria y tecnología futurista. Asientos clase business con gastronomía local.' },
-  { id:3, city:'Bali', country:'Indonesia', iataFrom:'MEX', iataTo:'DPS', originCity:'Ciudad de México',
-    hue:['#1f6b5a','#0d3d33'], price:1850, date:'05 AGO 2026', time:'23:50', flightNo:'QR 0942', seat:'22C',
-    duration:'22h 10m', airline:'Qatar Airways', site:'Aviasales',
-    link:'https://aviasales.tpk.lu/6EgycCGa',
-    description:'Relájate en paraísos tropicales, playas de arena blanca y templos sagrados. La escapada perfecta para desconectar.' }
+const AVIASALES_LINK = 'https://aviasales.tpk.lu/6EgycCGa';
+const KLOOK_LINK = 'https://www.klook.com/'; // actualizar con el link de afiliado real generado
+
+const DESTINATIONS = [
+  { id:1, city:'París', country:'Francia', iataTo:'CDG', hue:['#2b4a6b','#13263d'],
+    tag:'Romance y arte',
+    description:'La Ciudad de la Luz combina historia, gastronomía y arquitectura en cada esquina. Ideal para una primera visita a Europa.' },
+  { id:2, city:'Tokio', country:'Japón', iataTo:'HND', hue:['#6b2b4a','#3d1326'],
+    tag:'Tradición y tecnología',
+    description:'Templos centenarios a pasos de rascacielos futuristas. Una de las ciudades más seguras y fascinantes del mundo para explorar a pie.' },
+  { id:3, city:'Bali', country:'Indonesia', iataTo:'DPS', hue:['#1f6b5a','#0d3d33'],
+    tag:'Playas y naturaleza',
+    description:'Arrozales en terraza, templos frente al mar y playas de arena volcánica. El destino favorito para desconectar sin perder comodidad.' },
+  { id:4, city:'Nueva York', country:'Estados Unidos', iataTo:'JFK', hue:['#3b3b5c','#1a1a2e'],
+    tag:'Ciudad que nunca duerme',
+    description:'Museos de talla mundial, Broadway, y barrios con identidad propia. Vuelos cortos desde México la hacen una escapada accesible.' },
+  { id:5, city:'Roma', country:'Italia', iataTo:'FCO', hue:['#7a4a2b','#3d2613'],
+    tag:'Historia viva',
+    description:'Camina entre ruinas de dos mil años y termina el día con la mejor pasta que hayas probado. Cada calle cuenta una historia distinta.' },
+  { id:6, city:'Cancún', country:'México', iataTo:'CUN', hue:['#1a6b6b','#0d3d3d'],
+    tag:'Caribe mexicano',
+    description:'Aguas turquesa, zonas arqueológicas cercanas y vuelos directos desde casi cualquier ciudad del país. La escapada de fin de semana clásica.' },
+  { id:7, city:'Buenos Aires', country:'Argentina', iataTo:'EZE', hue:['#4a2b6b','#26133d'],
+    tag:'Tango y asado',
+    description:'Una de las capitales culturales de Sudamérica, con arquitectura europea, vida nocturna intensa y una escena gastronómica enorme.' },
+  { id:8, city:'Lisboa', country:'Portugal', iataTo:'LIS', hue:['#2b5a7a','#13293d'],
+    tag:'Costera y accesible',
+    description:'Colinas con miradores, tranvías históricos y una de las relaciones costo-beneficio más altas de Europa Occidental.' },
+  { id:9, city:'Seúl', country:'Corea del Sur', iataTo:'ICN', hue:['#6b4a2b','#3d2913'],
+    tag:'K-culture',
+    description:'Mercados nocturnos, palacios reales y la base de la ola cultural coreana. Comida callejera excepcional a cualquier hora.' },
+  { id:10, city:'Ciudad del Cabo', country:'Sudáfrica', iataTo:'CPT', hue:['#2b6b4a','#133d26'],
+    tag:'Naturaleza extrema',
+    description:'Montaña de la Mesa, viñedos y costa atlántica en la misma ciudad. Uno de los destinos más fotogénicos del continente africano.' },
+  { id:11, city:'Praga', country:'República Checa', iataTo:'PRG', hue:['#6b2b5c','#3d132e'],
+    tag:'Cuento de hadas',
+    description:'Castillos medievales, cerveza local de primer nivel y precios bastante más bajos que el resto de Europa Occidental.' },
+  { id:12, city:'Dubái', country:'Emiratos Árabes', iataTo:'DXB', hue:['#7a6b2b','#3d3513'],
+    tag:'Lujo y modernidad',
+    description:'Desde desiertos hasta el edificio más alto del mundo. Punto de conexión frecuente para vuelos a Asia y África a buen precio.' },
+  { id:13, city:'Ámsterdam', country:'Países Bajos', iataTo:'AMS', hue:['#2b4a3b','#13261d'],
+    tag:'Canales y bicicletas',
+    description:'Museos de clase mundial, una vida ciclista envidiable y uno de los aeropuertos mejor conectados para seguir viaje por Europa.' },
+  { id:14, city:'Marrakech', country:'Marruecos', iataTo:'RAK', hue:['#8a5a2b','#3d2913'],
+    tag:'Zocos y desierto',
+    description:'Mercados llenos de color, riads tradicionales y excursiones al desierto del Sahara a pocas horas de distancia.' },
+  { id:15, city:'Reikiavik', country:'Islandia', iataTo:'KEF', hue:['#2b5a6b','#13293d'],
+    tag:'Auroras y géiseres',
+    description:'Paisajes volcánicos, aguas termales y, en temporada, auroras boreales. Un destino de naturaleza extrema sin necesitar visa.' }
 ];
+
+function pickRandomDestinations(n) {
+  const shuffled = [...DESTINATIONS].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, n);
+}
+
+const FLIGHT_DATA = pickRandomDestinations(3);
 
 const SAVED_FLIGHTS = [
   { city:'Nueva York', date:'15 SEP 2026', status:'Buscado', price:650 },
   { city:'Roma', date:'02 OCT 2026', status:'Guardado', price:980 }
 ];
-
-let selectedFlight = null;
 
 function cardArtSvg(hue, id) {
   return `<svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
@@ -410,22 +407,28 @@ function renderCards() {
   grid.innerHTML = FLIGHT_DATA.map(f => `
     <div class="flight-card glass-panel">
       <div class="card-art">${cardArtSvg(f.hue, f.id)}
-        <span class="card-chip">$${f.price} USD</span>
+        <span class="card-chip">${f.tag}</span>
       </div>
       <div class="card-body">
         <h3 class="serif">${f.city}</h3>
         <p class="card-country">${f.country}</p>
         <p class="card-desc">${f.description}</p>
-        <div class="card-meta">
-          <span>${f.date}</span><span>${f.duration}</span>
-        </div>
-        <button class="btn-card" onclick="selectFlight(${f.id})">
-          Ver Detalles del Vuelo
+        <button class="btn-card" onclick="searchDestination('${f.city}')" style="margin-bottom:0.6rem;">
+          Buscar vuelos a ${f.city}
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         </button>
+        <a class="btn-card" href="${KLOOK_LINK}" target="_blank" rel="noopener" style="background:transparent; border:1px solid rgba(255,255,255,0.3); color:#fff; box-shadow:none;">
+          Tours y actividades
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </a>
       </div>
     </div>
   `).join('');
+}
+
+function searchDestination(city) {
+  // Lleva al usuario al buscador real de Aviasales ya integrado arriba en la misma página
+  document.getElementById('widgetAnchor').scrollIntoView({ behavior: 'smooth' });
 }
 
 function renderSaved() {
@@ -449,76 +452,6 @@ function renderSaved() {
   `).join('');
 }
 
-function selectFlight(id) {
-  selectedFlight = FLIGHT_DATA.find(f => f.id === id);
-  renderDetail();
-  navTo('detalles');
-}
-
-function renderDetail() {
-  const f = selectedFlight;
-  document.getElementById('detailHero').innerHTML = cardArtSvg(f.hue, 'd'+f.id) +
-    `<div class="hero-title"><h2 class="serif">${f.city}</h2><p>${f.country}</p></div>`;
-  document.getElementById('detailDesc').textContent = f.description;
-  document.getElementById('sumBase').textContent = '$' + (f.price - 250);
-  document.getElementById('sumTotal').textContent = '$' + f.price;
-  document.getElementById('buyLabel').textContent = 'Ver en ' + f.site;
-  document.getElementById('buyLink').href = f.link;
-}
-
-function generateBarcode() {
-  let html = '';
-  for (let i = 0; i < 28; i++) {
-    const r = Math.random();
-    const cls = r > 0.6 ? 'thick' : r > 0.3 ? '' : 'thin';
-    const h = 20 + Math.random() * 30;
-    html += `<div class="bar ${cls}" style="height:${h}px"></div>`;
-  }
-  return html;
-}
-
-function renderPass() {
-  const f = selectedFlight;
-  document.getElementById('passWrap').innerHTML = `
-    <div class="pass slide-up">
-      <div class="pass-tag">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="transform:rotate(45deg)"><path d="M22 2 11 13 2 9z"/><path d="M22 2 15 22l-4-9-9-4z"/></svg>
-        <div class="vert">BOARDING PASS</div>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="transform:rotate(-135deg)"><path d="M22 2 11 13 2 9z"/><path d="M22 2 15 22l-4-9-9-4z"/></svg>
-      </div>
-      <div class="pass-main">
-        <div class="pass-top">
-          <div class="pax"><p>PASSENGER</p><p>Viajero Frecuente</p></div>
-        </div>
-        <div class="pass-city">
-          <h1 class="serif">${f.city}</h1>
-          <p>${f.country}</p>
-        </div>
-        <div class="pass-route">
-          <div><p class="iata">${f.iataFrom}</p><p class="iata-sub">${f.originCity}<br>Airport</p></div>
-          <div class="line-wrap"><div class="line"></div><span class="plane-icon">✈</span></div>
-          <div style="text-align:right"><p class="iata">${f.iataTo}</p><p class="iata-sub">${f.city}<br>Airport</p></div>
-        </div>
-        <div class="pass-bottom">
-          <div><p class="label">DATE</p><p class="val">${f.date}</p></div>
-          <div><p class="label">TIME</p><p class="val">${f.time}</p></div>
-          <div><p class="label">FLIGHT</p><p class="val">${f.flightNo}</p></div>
-          <div><p class="label">SEAT</p><p class="val seat">${f.seat}</p></div>
-        </div>
-        <div class="pass-footer">HAVE A NICE FLIGHT ✈</div>
-      </div>
-      <div class="pass-stub">
-        <div class="stub-top">BOARDING PASS ✈</div>
-        <div class="stub-info">
-          <div class="stub-row"><p class="label">FROM</p><p class="val">${f.iataFrom}</p><p class="sub">${f.originCity}</p></div>
-          <div class="stub-row"><p class="label">TO</p><p class="val">${f.iataTo}</p><p class="sub">${f.city}</p></div>
-        </div>
-        <div class="barcode">${generateBarcode()}</div>
-      </div>
-    </div>
-  `;
-}
-
 function startJourney() {
   document.getElementById('portada').style.display = 'none';
   document.getElementById('sidebar').style.display = '';
@@ -529,14 +462,8 @@ function navTo(view) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById('view-' + view).classList.add('active');
   document.querySelectorAll('[data-view]').forEach(b => b.classList.toggle('active', b.dataset.view === view));
-  if (view === 'confirmacion' && selectedFlight) renderPass();
   window.scrollTo({ top: 0, behavior: 'instant' });
 }
-
-// Botón de compra: muestra el pase de abordar de referencia después de abrir el link externo
-document.getElementById('buyLink').addEventListener('click', () => {
-  setTimeout(() => navTo('confirmacion'), 150);
-});
 
 renderCards();
 renderSaved();
